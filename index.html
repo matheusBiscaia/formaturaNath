@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Presença - Formatura</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { max-width: 400px; margin: auto; }
+        label { display: block; margin-top: 10px; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 20px; padding: 10px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        #mensagem { margin-top: 20px; color: green; }
+    </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Importações das funções Firebase que você vai usar
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        // import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js"; // Descomente se for usar Analytics
+
+        // Sua configuração do Firebase web app
+        const firebaseConfig = {
+          apiKey: "AIzaSyCFxcKkzezJgAIjWuDiGsco5ZUIMV-pPvc",
+          authDomain: "formatura-nath.firebaseapp.com",
+          projectId: "formatura-nath",
+          storageBucket: "formatura-nath.firebasestorage.app",
+          messagingSenderId: "144387828337",
+          appId: "1:144387828337:web:ac4b0b635f898ce4af49d0",
+          measurementId: "G-Y3MVRWNBXG" // Este é o seu ID de medição do Analytics
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Inicializa o Firestore
+        // const analytics = getAnalytics(app); // Inicializa o Analytics se descomentar a linha acima
+
+        // Função para salvar os dados no Firestore
+        window.salvarNoBanco = async function(dados) {
+            try {
+                await addDoc(collection(db, "confirmacoes"), dados); // Adiciona um novo documento na coleção "confirmacoes"
+                document.getElementById("mensagem").innerText = "Confirmação enviada com sucesso!";
+                document.getElementById("mensagem").style.color = "green"; // Garante que a mensagem de sucesso seja verde
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                document.getElementById("mensagem").innerText = "Erro ao enviar. Tente novamente.";
+                document.getElementById("mensagem").style.color = "red"; // Garante que a mensagem de erro seja vermelha
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Confirme sua Presença na Formatura</h1>
+    <p>Preencha o formulário abaixo para confirmar se você comparecerá.</p>
+    
+    <form id="rsvpForm">
+        <label for="nome">Nome Completo:</label>
+        <input type="text" id="nome" name="nome" required>
+        
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required>
+        
+        <label for="presenca">Você comparecerá?</label>
+        <select id="presenca" name="presenca" required>
+            <option value="">Selecione</option>
+            <option value="Sim">Sim</option>
+            <option value="Não">Não</option>
+        </select>
+        
+        <button type="submit">Enviar Confirmação</button>
+    </form>
+    <div id="mensagem"></div>
+
+    <script>
+        // Adiciona um "listener" ao formulário para capturar o envio
+        document.getElementById("rsvpForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário (que recarregaria a página)
+            const dados = { // Coleta os dados do formulário
+                nome: document.getElementById("nome").value,
+                email: document.getElementById("email").value,
+                presenca: document.getElementById("presenca").value,
+                timestamp: new Date().toISOString() // Adiciona um timestamp para registrar quando a confirmação foi feita
+            };
+            window.salvarNoBanco(dados); // Chama a função para salvar os dados no Firestore
+            this.reset();  // Limpa o formulário após o envio
+        });
+    </script>
+</body>
+</html>
